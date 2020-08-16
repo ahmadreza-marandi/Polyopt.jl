@@ -40,11 +40,11 @@ function pothen_sun(par::Vector{T}, post::Vector{T}, colcount::Vector{T}) where 
     ns, flag
 end
 
-function round_array(T, A)
+function round_array(T, A::SparseMatrixCSC{Tv,Ti}) where {Tv<:Number,Ti<:Int}
     if T <: Integer
-        map(x->Base.round(T,x),A)
+        convert(SparseMatrixCSC{T,Ti},map(x->Base.round(T,x),A))
     else 
-        map(x->Base.round(x),A)
+        convert(SparseMatrixCSC{T,Ti},map(x->Base.round(x),A))
     end
 end
 
@@ -54,7 +54,7 @@ function chordal_embedding(A::SparseMatrixCSC{Tv,Ti}, Perm::Vector{Ti}) where {T
     
     F = cholesky(round_array(Float64,A), shift=n, perm=Perm)    
     s = F.p
-    p = round_array(Int64,[ s[i] for i=1:length(s)])
+    p = [ round(Int64,s[i]) for i=1:length(s)]
 
     par, post, colcount = chm_analyze_ordering(S, s.ordering, p)
     ns, flag = pothen_sun(par+1, post+1, colcount)
